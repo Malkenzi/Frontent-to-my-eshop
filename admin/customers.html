@@ -20,12 +20,28 @@
                     const table = $("#customers-table");
                     table.empty();
                     table.append
-                    ('<tr><th>ID</th><th>Name</th><th>Surname</th><th>Email</th><th>Address</th><th>Age</th><th>Phone_number</th><tr>')
+                    ('<tr><th>ID</th><th>Name</th><th>Surname</th><th>Email</th><th>Address</th><th>Age</th><th>Phone_number</th><th>balance</th><tr>')
                     for(let customer of data) {
-                        table.append
-                        (`<tr><td>${customer.id}</td><td onclick="onClickOnCustomer(${customer.id});">${customer.name}</td><td>${customer.surname}</td><td>
+
+                        $.ajax(`${BASEURI}/customer/account/${customer.id}`).done(function(customerAccount){
+
+                            // az teprve co mi dojde customer account pro kazdeho customera,
+                            // muzu appendovat radek, protoze ay ted vim jeho money
+
+                            table.append
+                            (`<tr><td>${customer.id}</td><td onclick="onClickOnCustomer(${customer.id});">${customer.name}</td><td>${customer.surname}</td><td>
                         ${customer.email}</td><td>${customer.address}</td><td>${customer.age}</td><td>
-                        ${customer.phoneNumber || "XXX"}</td></tr>`)
+                        ${customer.phoneNumber || "XXX"}</td><td>${customerAccount.money}</td></tr>`)
+
+
+
+
+                        });
+
+
+
+
+
                     }
                 }
             });

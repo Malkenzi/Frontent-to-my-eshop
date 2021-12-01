@@ -12,6 +12,8 @@
         const PAGE_SIZE = 5
         let table;
         let paging;
+        let balance;
+        let customerSelect;
 
         let orders = []
 
@@ -19,67 +21,86 @@
         let pageCount = 1
 
 
-
-        $(document).ready(function(){
+        $(document).ready(function () {
 
             table = $("#orders-table");
             paging = $("#paging");
+            balance = $("#balance");
+            customerSelect = $("#customerId");
 
-            $.ajax(`${BASEURI}/customer`).done(function(data){
+            // volam customer, if done (spusti funct..)
+            $.ajax(`${BASEURI}/customer`).done(function (data) {
 
-                console.log("toto mi prislo z mojho backendu o customeroch",data);
+                console.log("toto mi prislo z mojho backendu o customeroch", data);
 
-                const customerSelect = $("#customerId");
+                // vyprazdni select
                 customerSelect.empty();
 
+                //pre kazdy prvok(customer) z pola data
                 for (let customer of data) {
+                    //value id (name/surname)
                     customerSelect.append(`<option value="${customer.id}">${customer.name} ${customer.surname}</option>`);
                 }
 
                 fetchOrders();
-
             });
         });
 
+        function fillBalance(customerId) {
 
-        function fetchOrders(){
+            balance.empty();
 
-            const customerSelect = $("#customerId");
+            $.ajax(`${BASEURI}/customer/account/${customerId}`).done(function (data) {
 
+                console.log("dosla response fill balance", data);
+                balance.append(data.money)
+            });
+        }
+
+
+        function fetchOrders() {
+            // Idcko vybraneho custmera
             const customerId = parseInt(customerSelect.val());
+
+            fillBalance(customerId)
 
             console.log(customerId)
 
-            $.ajax(`${BASEURI}/bought-product/${customerId}`).done(function(data){
+            //Ak dojdu orders z custID
+            $.ajax(`${BASEURI}/bought-product/${customerId}`).done(function (data) {
 
                 table.empty();
-                paging.empty();
+                paging.empty(); //aby sa neduplikovalo
 
+                //
                 if (data && data.length > 0) {
 
                     orders = data
 
                     pageCount = getPageCount(orders.length);
 
-                    fillTable(orders.slice(0,PAGE_SIZE));
+                    //zapln tabulku prvymi piatimi
+                    fillTable(orders.slice(0, PAGE_SIZE));
 
+                    // nastav strankovanie podla poctu stranok
                     fillPaging(pageCount);
 
                 } else {
                     orders = []
-                    table.append("<p>customer does not have any orders</p>")
+                    table.append("<p>Customer does not have any orders</p>")
                 }
             });
 
         }
-
+        //podla poctu stranok (strankovanie)
         function fillPaging(pageCount) {
 
             for (let i = 0; i < pageCount; i++) {
-                if ((i+1) === currentTablePage) {
-                    paging.append(`<a onclick="onClickOnPage(${i})"><b>${i+1} </b></a>`)
+                if ((i + 1) === currentTablePage) {
+                    //ak odpoveda i = current page, tak 'B'
+                    paging.append(`<a onclick="onClickOnPage(${i})"><b>${i + 1} </b></a>`)
                 } else {
-                    paging.append(`<a onclick="onClickOnPage(${i})">${i+1} </a>`)
+                    paging.append(`<a onclick="onClickOnPage(${i})">${i + 1} </a>`)
                 }
             }
         }
@@ -88,17 +109,17 @@
 
             table.append("<tr><th>customer</th><th>product</th><th>bought at</th><th>quantity</th></tr>")
 
-            for(let order of orders) {
-
-                $.ajax(`${BASEURI}/customer/${order.customerId}`).done(function(data){
+            for (let order of orders) {
+                // pre kazdy order najde customera
+                $.ajax(`${BASEURI}/customer/${order.customerId}`).done(function (data) {
 
                     const customerName = data.name + " " + data.surname;
-
-                    $.ajax(`${BASEURI}/product/${order.productId}`).done(function(data){
+                    //ak dojde customer spytam sa na product
+                    $.ajax(`${BASEURI}/product/${order.productId}`).done(function (data) {
 
                         const productName = data.name;
-
-                        table.append(`<tr><td>${customerName}</td><td>${productName}</td><td>${order.boughtAt.slice(0,16)}</td><td>${order.quantity}</td></tr>`)
+                        // ak dojde produkt mozem ho vlozit do tabulky
+                        table.append(`<tr><td>${customerName}</td><td>${productName}</td><td>${order.boughtAt.slice(0, 16)}</td><td>${order.quantity}</td></tr>`)
 
                     });
                 });
@@ -108,21 +129,22 @@
 
         function onClickOnPage(i) {
 
-            currentTablePage = i+1
+            // if i(index stranky) = 2 (clovek klikol na 3k)
+            currentTablePage = i + 1
 
             console.log("chcu stranku", i)
 
             table.empty();
             paging.empty();
-
-            fillTable(orders.slice(PAGE_SIZE*i,PAGE_SIZE*(i+1)));
+                                        //0-5       //5-10
+            fillTable(orders.slice(PAGE_SIZE * i, PAGE_SIZE * (i + 1)));
 
             fillPaging(pageCount);
 
         }
-
+        // Prepocet orders vrati pocet stranok + zaokruhlovanie ()
         function getPageCount(n) {
-            return Math.ceil(n/PAGE_SIZE);
+            return Math.ceil(n / PAGE_SIZE);
         }
 
     </script>
@@ -133,6 +155,9 @@
 <a href="admin.html"><-Back</a>
 <br/>
 <br/>
+
+<p id="balance"></p>
+
 <label for="customerId">Choose a customer</label>
 
 <select onchange="fetchOrders();" name="customerId" id="customerId">
