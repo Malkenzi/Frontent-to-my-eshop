@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+    <script>
+
+        const BASEURI = "http://localhost:7070"
+//ked sa nacita stranka
+        $(document).ready(function(){
+
+            $.ajax(`${BASEURI}/product`).done(function(data){
+
+                console.log("toto mi prislo z mojho backendu o produktoch",data)
+
+                if (data) {
+                    const table = $("#products-table");
+                    table.empty();
+                    table.append('<tr><th>name</th><th>description</th><th>price</th><th>createdAt</th><th>available</th></tr>')
+                    for(let product of data) {
+                        table.append(`<tr><td onclick="onClickOnProduct(${product.id});">${product.name}</td><td>${product.description}</td><td>${product.price}</td><td>${product.createdAt}</td><td>${product.available}</td></tr>`)
+                    }
+                }
+            });
+        });
+        function onClickOnProduct(productId) {
+            console.log("Detaily productId",productId)
+
+            const detail = $("#product-detail-section");
+            detail.empty();
+
+            $.ajax(`${BASEURI}/product/${productId}`).done(function(data){
+                console.log("data pro konkretny product",data)
+
+                detail.append(keyValueParagraph("productname",data.name))
+                detail.append(keyValueParagraph("proddescript",data.description))
+                detail.append(keyValueParagraph("producreatedat",data.createdAt))
+
+                $.ajax(`${BASEURI}/merchant/${data.merchantId}`).done(function(data){
+                    console.log("data pro konkretniho merchanta",data)
+
+                    detail.append(keyValueParagraph("merchname",data.name))
+                    detail.append(keyValueParagraph("merchaaddress",data.address))
+                    detail.append(keyValueParagraph("merchantemail",data.email))
+                });
+            });
+        }
+
+        function keyValueParagraph(key, value) {
+            return `<p>${key}: ${value}</p>`
+        }
+
+    </script>
+</head>
+<body>
+
+<h1>Products</h1>
+
+<a href="index_backup.html">Home page</a>
+
+<table id="products-table">
+    <tr>
+        <th>name</th>
+        <th>description</th>
+        <th>price</th>
+        <th>createdAt</th>
+        <th>available</th>
+    </tr>
+</table>
+
+<div id="product-detail-section">
+
+</div>
+
+</body>
+</html>

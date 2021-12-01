@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Merchants</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+    <script>
+
+        const BASEURI = "http://localhost:7070"
+
+        $(document).ready(function(){
+
+            $.ajax(`${BASEURI}/merchant`).done(function(data){
+
+                console.log("toto mi prislo z mojho backendu o vyrobcoch",data)
+
+                if (data) {
+                    const table = $("#merchants-table");
+                    table.empty();
+                    table.append('<tr><th>Name</th></tr>')
+                    for(let merchant of data) {
+                        table.append(`<tr><td onclick="onClickOnMerchant(${merchant.id});">${merchant.name}</td></tr>`)
+                    }
+                }
+            });
+        });
+
+        //Detail
+        function onClickOnMerchant(merchantId) {
+            console.log("Detaily MerchantId",merchantId)
+
+            const detail = $("#merchant-detail-section");
+            detail.empty();
+
+                $.ajax(`${BASEURI}/merchant/${merchantId}`).done(function(merchantData){
+                console.log("data pre konkretneho merchanta",merchantData)
+
+                detail.append(keyValueParagraph("Name",merchantData.name))
+                detail.append(keyValueParagraph("Email",merchantData.email))
+                detail.append(keyValueParagraph("Address",merchantData.address))
+
+                 // $.ajax(`${BASEURI}/merchant/${data.merchantId}`).done(function(data){
+                 //    console.log("data pro konkretneho merchanta",data)
+                 //
+                 //    detail.append(keyValueParagraph("merchname",data.name))
+                 //    detail.append(keyValueParagraph("merchaaddress",data.address))
+                 //    detail.append(keyValueParagraph("merchantemail",data.email))
+                 //});
+            });
+        }
+
+        function keyValueParagraph(key, value) {
+            return `<p>${key}: ${value}</p>`
+        }
+    </script>
+</head>
+<body>
+
+<h1>Merchants</h1>
+
+<a href="admin.html"><-Back</a>
+<a href="../index.html">Home page</a>
+<a href="newMerchant.html">Add new Merchant</a>
+<br/>
+<br/>
+<table id="merchants-table">
+    <tr>
+        <th>Name</th>
+        <!--<th>email</th>
+        <th>address</th>-->
+    </tr>
+
+</table>
+<div id="merchant-detail-section">
+
+</div>
+
+</body>
+</html>

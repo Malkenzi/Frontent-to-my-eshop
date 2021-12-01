@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customers</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+    <script>
+
+        const BASEURI = "http://localhost:7070"
+
+        $(document).ready(function(){
+
+            $.ajax(`${BASEURI}/customer`).done(function(data){
+
+                console.log("toto mi prislo z backendu",data)
+
+                if (data) {
+                    const table = $("#customers-table");
+                    table.empty();
+                    table.append
+                    ('<tr><th>ID</th><th>Name</th><th>Surname</th><th>Email</th><th>Address</th><th>Age</th><th>Phone_number</th><tr>')
+                    for(let customer of data) {
+                        table.append
+                        (`<tr><td>${customer.id}</td><td onclick="onClickOnCustomer(${customer.id});">${customer.name}</td><td>${customer.surname}</td><td>
+                        ${customer.email}</td><td>${customer.address}</td><td>${customer.age}</td><td>
+                        ${customer.phoneNumber || "XXX"}</td></tr>`)
+                    }
+                }
+            });
+        });
+        function onClickOnCustomer(customerId) {
+            console.log("Detaily customerId",customerId)
+
+            const detail = $("#customer-detail-section");
+            detail.empty();
+
+            $.ajax(`${BASEURI}/customer/${customerId}`).done(function(data){
+                console.log("data pro konkretneho zakaznika",data)
+
+                detail.append(keyValueParagraph("ID",data.id))
+                detail.append(keyValueParagraph("Name",data.name))
+                detail.append(keyValueParagraph("Surname",data.surname))
+                detail.append(keyValueParagraph("Email",data.email))
+                detail.append(keyValueParagraph("Address",data.address))
+                detail.append(keyValueParagraph("Age",data.age))
+                detail.append(keyValueParagraph("Phone number",data.phoneNumber))
+
+                // $.ajax(`${BASEURI}/merchant/${data.customerId}`).done(function(data){
+                //     console.log("data pro konkretneho customera",data)
+                //
+                //     detail.append(keyValueParagraph("customerid",data.id))
+                //     detail.append(keyValueParagraph("customername",data.name))
+                //     detail.append(keyValueParagraph("customersurname",data.surname))
+                //     detail.append(keyValueParagraph("customeremail",data.email))
+                //     detail.append(keyValueParagraph("customeraddress",data.address))
+                //     detail.append(keyValueParagraph("customerage",data.age))
+                //     detail.append(keyValueParagraph("customerphonenumber",data.phone))
+                // });
+            });
+        }
+
+        function keyValueParagraph(key, value) {
+            return `<p>${key}: ${value}</p>`
+        }
+
+    </script>
+</head>
+<body>
+
+<h1>Customers</h1>
+<a href="admin.html"><-Back</a>
+<a href="../index.html">Home page</a>
+<a href="newCustomer.html">Add new Customer</a>
+<br/>
+<br/>
+<table id="customers-table">
+    <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>surname</th>
+        <th>email</th>
+        <th>address</th>
+        <th>age</th>
+        <th>phone_number</th>
+    </tr>
+
+</table>
+
+<div id="customer-detail-section"/>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creation of new merchant</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+</head>
+
+<script>
+
+    $(document).ready(function(){
+
+        $("#button" )
+            .click(function() {
+                $.ajax({
+                    url: 'http://localhost:7070/merchant', // url
+                    type: 'post',
+                    data: JSON.stringify({ //Json(Request BODY)
+                        name:  $("#name").val(),
+                        email: $("#email").val(),
+                        address: $("#address").val()
+                    }),
+                    headers: {
+                        "Content-Type": 'application/json',
+                    },
+                    dataType: 'json', // Ujasnuje ze posielame json
+                    statusCode: {
+                        201: onMerchantCreated,
+                        500: onInternalError
+                    }
+                });
+            });
+    });
+
+    function onMerchantCreated(data) {
+
+        console.log("dosla response",data)
+
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Merchant created")
+    }
+
+    function onInternalError(data) {
+        console.log(data)
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Merchant not created")
+    }
+
+</script>
+</head>
+
+<body>
+<a href="admin.html"><-Back></a>
+<br/> <!-- break -->
+
+<h1>New Merchant</h1>
+
+<label for="name">Merchant name</label><br/>
+<input id="name" type="text" name="name"><br/><br/>
+
+<label for="email">Email</label><br/>
+<input id="email" type="email" name="email"><br/><br/>
+
+<label for="address">Merchant address</label><br/>
+<input id="address" type="text" name="address"><br/><br/>
+
+
+<input id="button" type="button" value="Create new merchant">
+
+<p id="info-panel"></p>
+
+</body>
+</html>

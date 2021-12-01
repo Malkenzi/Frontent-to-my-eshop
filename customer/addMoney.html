@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+    <script>
+
+        $(document).ready(function(){
+            $("#button" )
+                .click(function() {
+                    $.ajax({
+                        url: 'http://localhost:7070/customer/account', // url
+                        type: 'post',
+                        data: JSON.stringify({ //Json(Request BODY)
+                            customerId: parseInt( $("#customerId").val()),
+                            money: parseInt($("#money").val())
+                        }),
+                        headers: {
+                            "Content-Type": 'application/json',
+                        },
+                        dataType: 'json', // Ujasnuje ze posielame json
+                        statusCode: {
+                            201: onTransactionSuccess,
+                            500: onInternalError
+                        }
+                    });
+                });
+        });
+
+        function onTransactionSuccess(data) {
+
+            console.log("dosla response",data)
+
+            const panel = $("#info-panel");
+
+            panel.empty();
+            panel.append("money successfully added")
+        }
+
+        function onInternalError(data) {
+            console.log(data)
+            const panel = $("#info-panel");
+
+            panel.empty();
+            panel.append("Customer ID doesnt exist..")
+        }
+
+    </script>
+
+</head>
+<body>
+
+<!--<br/> break -->
+
+<h1>Add money</h1>
+<a href="customer.html"><-Back</a>
+<br/> <!-- break -->
+<br/>
+<label for="customerId">Enter your customer ID</label><br/>
+<input id="customerId" type="number" name="customerId"><br/>
+
+<label for="money">Amount to deposit</label><br/>
+<input id="money" type="number" name="money"><br/><br/>
+
+<input id="button" type="button" value="Deposit money">
+
+<p id="info-panel"></p>
+
+
+
+</body>
+</html>

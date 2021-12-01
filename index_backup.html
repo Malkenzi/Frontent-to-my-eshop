@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Http Long Polling</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery.js"></script>
+    <script>
+
+        // Pusti fuknciu (interval)
+        function poll() {
+
+            // kazdych "1000" milisekund pusti tuto fuknciu
+            setInterval (function () {
+                $.ajax("http://localhost:8888/messages").done(function(data){
+                    const list = $("#list");
+                    list.empty();
+                    for(let msg of data.reverse()) {
+                        list.append(`<li><strong>${msg.userName}:</strong> ${msg.message}</li>`)
+                    }
+                });
+            }, 1000);
+        }
+
+        // Ked sa nacita dukument pusti poll()"
+        $(document).ready(function(){
+
+            $.ajax("http://localhost:7070/merchant").done(function(data){
+                console.log("toto mi prislo z backendu",data)
+            });
+            poll();
+            $("#button" )
+                .click(function() {
+                    $.post('http://localhost:8888/messages',
+                        JSON.stringify({
+                            userName: $("#UserName").val(),
+                            message: $("#review").val()
+                        }),
+                        function(response) {}, 'json');
+                });
+        });
+    </script>
+</head>
+<body>
+<div>
+    <h1>Welcome to my eshop</h1>
+    <label for="UserName">userName</label><br/>
+    <input id="UserName" type="text" name="UserName"><br/>
+    <label for="review">review</label><br/>
+    <textarea id="review" name="review"></textarea><br/>
+    <input id="button" type="button" value="Send">
+</div>
+<h1>Reviews</h1>
+<ul id="list"></ul>
+
+<a href="admin/merchants.html">merchants</a>
+<br/>
+<a href="products.html">products</a>
+<br/>
+<a href="admin/customers.html">customers</a>
+
+</body>
+</html>

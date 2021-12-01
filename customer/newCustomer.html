@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creation of New customer</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+</head>
+
+<script>
+
+    $(document).ready(function(){
+
+        $("#button" )
+            .click(function() {
+                $.ajax({
+                    url: 'http://localhost:7070/customer', // url
+                    type: 'post',
+                    data: JSON.stringify({ //Json(Request BODY)
+                        name: $("#name").val(),
+                        surname: $("#surname").val(),
+                        email: $("#email").val(),
+                        address: $("#address").val(),
+                        age: parseInt($("#age").val()),
+                        phoneNumber: $("#phoneNumber").val()
+                    }),
+                    headers: {
+                        "Content-Type": 'application/json',
+                    },
+                    dataType: 'json', // Ujasnuje ze posielame json
+                    statusCode: {
+                        201: onCustomerCreated,
+                        500: onInternalError
+                    }
+                });
+            });
+    });
+
+    function onCustomerCreated(data) {
+
+        console.log("dosla response",data)
+
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Customer created (your id: " + data.customerId + ")")
+    }
+
+    function onInternalError(data) {
+        console.log(data)
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Customer not created")
+    }
+
+</script>
+
+</head>
+
+<body>
+<!--<br/> break -->
+
+<h1>New Customer</h1>
+<a href="customer.html"><-back</a>
+<br/>
+<br/>
+
+<label for="name">enter name</label><br/>
+<input id="name" type="text" name="customerId"><br/><br/>
+
+<label for="surname">enter surname</label><br/>
+<input id="surname" type="text" name="surname"><br/><br/>
+
+<label for="email">enter email</label><br/>
+<input id="email" type="text" name="email"><br/><br/>
+
+<label for="address">enter address</label><br/>
+<input id="address" type="text" name="address"><br/><br/>
+
+<label for="age">enter age</label><br/>
+<input id="age" type="number" name="age"><br/><br/>
+
+<label for="phoneNumber">enter your number</label><br/>
+<input id="phoneNumber" type="text" name="phoneNumber"><br/><br/>
+
+<input id="button" type="button" value="Create new customer">
+
+<p id="info-panel"></p>
+
+</body>
+</html>

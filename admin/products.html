@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+    <script>
+
+        const BASEURI = "http://localhost:7070"
+
+        $(document).ready(function () {
+
+            fetchProducts();
+        });
+
+        function fetchProducts(){
+
+            $.ajax(`${BASEURI}/product`).done(function (data) {
+
+                console.log("toto mi prislo z mojho backendu o vyrobcoch", data)
+                if (data) {
+                    const table = $("#products-table");
+                    //Hlavicka
+                    table.empty();
+                    table.append('<tr><th>Name</th><th>Description</th><th>Price</th></tr>')
+                    //Data (riadok)
+                    for (let product of data) {
+                        table.append(`<tr><td onclick="onClickOnProduct(${product.id});">${product.name}</td><td>${product.description}</td><td>${product.price}</td></tr>`)
+
+                    }
+                }
+            });
+
+        }
+
+        //Detail
+        function onClickOnProduct(productId) {
+            console.log("Detaily productId", productId)
+
+            const detail = $("#product-detail-section");
+            detail.empty();
+
+            $.ajax(`${BASEURI}/product/${productId}`).done(function (productData) {
+
+                console.log("ja sem X data pro konkretny product", productData)
+
+                detail.append(keyValueParagraph("Name", productData.name))
+                detail.append(keyValueParagraph("Description", productData.description))
+                detail.append(keyValueParagraph("Created at", productData.createdAt))
+
+                $.ajax(`${BASEURI}/merchant/${productData.merchantId}`).done(function (merchantData) {
+
+                    console.log("data pro konkretniho merchanta", merchantData)
+
+                    // Natiahnute data od Merchanta
+                    detail.append(keyValueParagraph("Name", merchantData.name))
+                    detail.append(keyValueParagraph("Address", merchantData.address))
+                    detail.append(keyValueParagraph("Email", merchantData.email))
+                    detail.append(keyValueParagraph("Available", productData.available))
+
+                    "<br/>"
+                    detail.append(`<button onclick='deleteProduct(${productData.id});'>Delete product</button>`);
+                    detail.append(`<button onclick='onClickOnPatchProduct(${productData.id});'>Patch product</button>`);
+
+                });
+            });
+        }
+
+        function onClickOnPatchProduct(productId){
+            window.location.href = `productForm.html?productId=${productId}`;
+        }
+
+        function deleteProduct(productId) {
+
+            console.log("deleting product",productId)
+
+            $.ajax({
+                url: `${BASEURI}/product/${productId}`, // url // deletion ?
+                type: 'delete',
+                statusCode: {
+                    200: onProductDelete,
+                    500: onInternalError
+                }
+            }).error(function (err){console.log("errrr",err.responseText)});
+        }
+
+        function onProductDelete(data) {
+
+            console.log("dosla response", data)
+
+            const detail = $("#product-detail-section");
+            detail.empty();
+
+            detail.append("<p>Product deleted</p>");
+
+            fetchProducts();
+
+        }
+
+        function onInternalError(err) {
+            console.log("dosiel err", err)
+
+            const panel = $("#info-panel");
+
+            panel.empty();
+            panel.append("Error occured")
+        }
+
+        function keyValueParagraph(key, value) {
+            return `<p>${key}: ${value}</p>`
+        }
+
+    </script>
+</head>
+<body>
+<h1>Product list</h1>
+
+<a href="../admin/admin.html"><- Back</a>
+<a href="../index.html">Home page</a>
+<a href="productForm.html">Add new Product</a>
+<br/>
+<br/>
+<table id="products-table">
+    <tr>
+        <!--<th>id</th>
+        <th>merchantId</th>-->
+        <th>Name</th>
+        <th>Description</th>
+        <th>Price</th>
+        <!--<th>createdAt</th>-->
+        <!--<th>available</th>-->
+    </tr>
+
+</table>
+<div id="product-detail-section"/>
+</body>
+</html>

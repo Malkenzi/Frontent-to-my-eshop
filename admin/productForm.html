@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creation of new Product</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <script src="../jquery.js"></script>
+
+</head>
+
+<script>
+
+    const BASEURI = "http://localhost:7070"
+
+    let CREATE = true;
+
+    let productId = null;
+
+    $(document).ready(function(){
+
+        const params = new URLSearchParams(window.location.search)
+
+        productId = params.get("productId");
+
+        if (productId) {
+
+            CREATE = false;
+
+            $.ajax(`${BASEURI}/product/${productId}`).done(function (productData) {
+
+                console.log("product data", productData);
+
+                product = productData;
+
+                $("#merchantId").val(product.merchantId)
+                $("#name").val(product.name)
+                $("#description").val(product.description)
+                $("#price").val(product.price)
+                $("#available").val(product.available)
+
+            });
+        }
+
+        const title = $("#title");
+
+        const titleValue = CREATE ? "New Product" : "Update Product"
+
+        title.append(titleValue);
+
+        $("#button").val(CREATE ? "Create Product" : "Update Product")
+
+
+
+        $.ajax(`${BASEURI}/merchant`).done(function(data){
+
+            console.log("toto mi prislo z mojho backendu o vyrobcoch",data);
+
+            const merchantSelect = $("#merchantId");
+            merchantSelect.empty();
+
+            for (let merchant of data) {
+                merchantSelect.append(`<option value="${merchant.id}">${merchant.name}</option>`);
+            }
+        });
+
+        $("#button" )
+            .click(function() {
+
+                $.ajax({
+                    url: CREATE ? `${BASEURI}/product` : `${BASEURI}/product/${productId}`, // url
+                    type: CREATE ? 'post' : 'patch',
+                    data: JSON.stringify({ //Json(Request BODY)
+                        //id: parseInt( $("#id").val()),
+                        merchantId: parseInt($("#merchantId").val()),
+                        name: $("#name").val(),
+                        description: $("#description").val(),
+                        price: parseInt($("#price").val()),
+                        //created_at: $("#created_at").val(),
+                        available: parseInt($("#available").val())
+                    }),
+                    headers: {
+                        "Content-Type": 'application/json',
+                    },
+                    dataType: 'json', // Ujasnuje ze posielame json
+                    statusCode: {
+                        201: onProductCreated,
+                        200: onProductUpdated,
+                        500: onInternalError
+                    }
+                });
+
+
+            });
+    });
+
+    function onProductCreated(data) {
+
+        console.log("dosla response",data)
+
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Product created")
+    }
+
+    function onProductUpdated(data) {
+
+        console.log("dosla response",data)
+
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Product updated")
+    }
+
+    function onInternalError(data) {
+        console.log(data)
+        const panel = $("#info-panel");
+
+        panel.empty();
+        panel.append("Product not created")
+    }
+
+</script>
+
+</head>
+
+<body>
+
+
+
+<h1 id="title"></h1>
+
+
+
+<a href="products.html"><-Back</a>
+<br/> <!-- break -->
+<br/>
+<label for="merchantId">choose a merchant</label><br/>
+
+<select name="merchantId" id="merchantId">
+    <!--<option value="volvo">Volvo</option>-->
+</select>
+
+
+<br/><br/>
+
+
+<label for="name">product name</label><br/>
+<input id="name" type="text" name="name"><br/><br/>
+
+<label for="description">description</label><br/>
+<input id="description" type="text" name="description"><br/><br/>
+
+<label for="price">enter your price</label><br/>
+<input id="price" type="text" name="price"><br/><br/>
+
+<label for="available">available</label><br/>
+<input id="available" type="number" name="available"><br/><br/>
+
+<input id="button" type="button" value="">
+
+<p id="info-panel"></p>
+
+</body>
+</html>
